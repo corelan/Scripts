@@ -25,21 +25,19 @@ class Dbg:
 			# Get basic infomation about the event
 			msg = str(Crash(event))
 
-			# Try to disassembly the code around the fault instruction
 			try:
 				eip  = thread.get_pc()
-				code = thread.disassemble_around(eip)
+				code = thread.disassemble_around_pc(eip)
 				msg += str(CrashDump.dump_code(code, eip))
-			except WindowsError, e:
+			except WindowsError as e:
 				pass
-			
+			print msg
 			# Log information about the crash (registers, disassemby, so on)
 			#logger = Logger('crashes/' + filename + '.log')
 			#logger.log_event(event, msg)
 			
 			# Attempt to kill the process
 			event.get_process().kill()
-
 
 	def run(self):
 		testcase = 1
@@ -50,7 +48,7 @@ class Dbg:
 				
 				# get next case file... 
 				# for the sake of the exercise, we'll use the same file every time
-				self.current_file = 'c:\\test.txt'
+				self.current_file = r'C:\Users\blackleitus\Desktop\fuzzing\fuzzing\CRASH_POC\\crash_0a06fc26-a8fa-4e91-bec1-5090a50c6289.dat'
 
 				print("Case #%d: running %s %s" % (testcase, self.app, self.current_file))				
 				dbg.execv([self.app] + [self.current_file])
@@ -77,7 +75,7 @@ class Dbg:
 			
 
 			# Kill any existing process of our target
-			for (process, name) in dbg.system.find_processes_by_filename('notepad.exe'):
+			for (process, name) in dbg.system.find_processes_by_filename('fuzzme.exe'):
 					#print process.get_pid(), name
 					pid = process.get_pid()
 					dbg.detach(process.get_pid())
@@ -85,5 +83,5 @@ class Dbg:
 						subprocess.call(['taskkill', '/F', '/T', '/PID', str(pid)], stdout = fnull, stderr = fnull)
 
 
-dbgengine = Dbg(r'c:\windows\system32\notepad.exe')
+dbgengine = Dbg(r'C:\Users\blackleitus\Desktop\fuzzing\fuzzing\fuzzme.exe')
 dbgengine.run()
